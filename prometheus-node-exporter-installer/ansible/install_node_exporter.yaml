@@ -1,15 +1,13 @@
 ---
-- hosts: all
+- hosts: node-1
   become: true
   tasks:
   - name: Create Node Exporter user group
-    become: true
     group:
       name: node_exporter
       state: present
 
   - name: Create Node Exporter user
-    become: true
     user:
       name: node_exporter
       shell: /sbin/nologin
@@ -24,7 +22,6 @@
       group: node_exporter
 
   - name: Write config file
-    become: true
     lineinfile:
       dest: /etc/sysconfig/node_exporter
       line: OPTIONS="--collector.textfile.directory /var/lib/node_exporter/textfile_collector"
@@ -42,16 +39,14 @@
       state: directory
 
   - name: extract tar
-    become: true
     unarchive:
       src: /tmp/node_exporter.tar.gz
       dest: /usr/share/node_exporter
       creates: /usr/share/node_exporter/node_exporter-1.0.1.linux-amd64
       remote_src: yes
       owner: node_exporter
-
+  
   - name: Setup systemd node_exporter service
-    become: true
     shell: |
       tee -a /etc/systemd/system/node_exporter.service << END
       [Unit]
@@ -67,8 +62,14 @@
       END
 
   - name: Start node_exporter service
-    become: true
     shell: |
       systemctl daemon-reload
       systemctl enable node_exporter
       systemctl start node_exporter
+    notify: node_exporter status
+  
+  handlers:
+    - name: node_exporter status
+      service: 
+        name: node_exporter
+        state: started

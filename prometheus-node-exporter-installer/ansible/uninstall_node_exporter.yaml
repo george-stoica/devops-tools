@@ -1,0 +1,41 @@
+---
+- hosts: all
+  become: true
+  tasks:
+  - name: Disable node_exporter service
+    shell: |
+      systemctl stop node_exporter
+      systemctl disable node_exporter
+      systemctl daemon-reload
+
+  - name: Remove node_exporter service definition
+    file:
+      path: /etc/systemd/system/node_exporter.service
+      state: absent
+
+  - name: Remove node_exporter bin folder
+    file:
+      path: /usr/share/node_exporter
+      state: absent
+
+  - name: Remove node_exporter configuration
+    file:
+      path: /etc/sysconfig/node_exporter
+      state: absent
+
+  - name: Remove node_exporter textfile collector home dir
+    file:
+      path: /var/lib/node_exporter
+      state: absent
+
+  - name: Remove Node Exporter user
+    user:
+      name: node_exporter
+      group: node_exporter
+      state: absent
+      remove: yes
+
+  - name: Remove Node Exporter user group
+    group:
+      name: node_exporter
+      state: absent

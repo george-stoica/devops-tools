@@ -1,17 +1,23 @@
+VM_IMAGE = "centos/7"
+
 Vagrant.configure("2") do |config|
     config.vagrant.plugins = ["vagrant-vbguest"]
     
-    config.vm.box = "centos/8"
-    config.vm.box_version = "1905.1"
-    config.vm.network "private_network", ip: "192.168.20.10"
-    
     config.vm.provider "virtualbox" do |vb|
-        vb.memory = 4096
-        vb.cpus = 2
+        vb.memory = 2048
+        vb.cpus = 1
     end
     
-    # config.vm.provision "ansible" do |ansible|
-    #     # ansible.inventory_path = "ansible/gst-inventory"
-    #     ansible.playbook = "ansible/install_node_exporter.yaml"
-    # end
+    config.vm.define "node-1" do |node|
+        node.vm.box = VM_IMAGE
+        node.vm.hostname = "node-1"
+        node.vm.network "private_network", ip: "192.168.10.10"
+    end
+    
+    config.vm.define "node-2" do |node|
+        node.vm.box = VM_IMAGE
+        node.vm.hostname = "node-2"
+        node.vm.network "private_network", ip: "192.168.10.11"
+    end
+
 end
